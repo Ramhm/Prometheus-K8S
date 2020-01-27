@@ -1,0 +1,35 @@
+
+# ██       ██████   ██████  █████  ██          ██████   █████  ████████ ██   ██
+# ██      ██    ██ ██      ██   ██ ██          ██   ██ ██   ██    ██    ██   ██
+# ██      ██    ██ ██      ███████ ██          ██████  ███████    ██    ███████
+# ██      ██    ██ ██      ██   ██ ██          ██      ██   ██    ██    ██   ██
+# ███████  ██████   ██████ ██   ██ ███████     ██      ██   ██    ██    ██   ██
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pm-lab-data
+  namespace: prometheus-lab
+  labels:
+    type: local
+spec:
+  storageClassName: prometheus
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/pm-lab/data"
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pm-lab-data-claim
+  namespace: prometheus-lab
+spec:
+  storageClassName: prometheus
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

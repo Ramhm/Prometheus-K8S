@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pm-lab
+  namespace: prometheus-lab
+  labels:
+    app: pm-lab
+spec:
+  selector:
+    matchLabels:
+      app: pm-lab
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: pm-lab
+    spec:
+      # k8s Node Selector
+      nodeSelector:
+         app: prometheus
+      # Ex Hosts
+      hostAliases:
+      - ip: "127.0.0.1"
+        hostnames:
+        - "pm.example.com"
+      containers:
+      - name: prometheus
+        args:
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --web.console.libraries=/usr/share/prometheus/console_libraries
+        - --web.console.templates=/usr/share/prometheus/consoles
+        - --storage.tsdb.retention=14d
+        - --storage.tsdb.retention.time=14d
+        - --storage.tsdb.retention.size=10GB
+        command:
+        - /bin/prometheus
+        image: prom/prometheus
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9090
+          name: console
+          protocol: TCP
+      # Limite
+        resources:
+          limits:
+            memory: "2G"
+            cpu: "2"
+        securityContext:
+          capabilities: {}
+          procMount: Default
+          runAsUser: 0
+      # Volume
+        volumeMounts:
+        - name: pm-conf
+          mountPath: /etc/prometheus/prometheus.yml
+          readOnly: true
+          subPath: prometheus.yml
+        - name: pm-storage
+          mountPath: "/prometheus"
+      # Mount
+      volumes:
+        - name: pm-conf
+          configMap:
+            name: pm-lab-config
+        - name: pm-storage
+          persistentVolumeClaim:
+            claimName: pm-lab-data-claim
