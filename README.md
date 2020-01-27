@@ -1,2 +1,2 @@
-# Prometheus-K8S
+# Prometheus On K8S
 Prometheus on Kubernetes
